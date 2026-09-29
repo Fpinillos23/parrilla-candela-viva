@@ -1,11 +1,35 @@
 import { Redis } from '@upstash/redis';
 
-// Vercel Marketplace (Upstash) crea KV_REST_API_URL / KV_REST_API_TOKEN.
-// Una cuenta directa de Upstash usa UPSTASH_REDIS_REST_URL / _TOKEN. Se aceptan ambas.
-const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+// Busca las credenciales REST de Upstash en las variables de entorno.
+// Vercel Marketplace crea KV_REST_API_URL / KV_REST_API_TOKEN (a veces con un prefijo,
+// p. ej. STORAGE_KV_REST_API_URL). Una cuenta directa de Upstash usa UPSTASH_REDIS_REST_URL / _TOKEN.
+function findCreds() {
+  const env = process.env;
+  const pairs = [
+    ['KV_REST_API_URL', 'KV_REST_API_TOKEN'],
+    ['UPSTASH_REDIS_REST_URL', 'UPSTASH_REDIS_REST_TOKEN'],
+  ];
+  for (const [u, t] of pairs) if (env[u] && env[t]) return { url: env[u], token: env[t], names: [u, t] };
+  // Con prefijo personalizado
+  for (const key of Object.keys(env)) {
+    for (const [u, t] of pairs) {
+      if (key.endsWith('_' + u)) {
+        const prefix = key.slice(0, key.length - u.length);
+        if (env[prefix + t]) return { url: env[key], token: env[prefix + t], names: [key, prefix + t] };
+      }
+    }
+  }
+  return null;
+}
 
-export const redis = url && token ? new Redis({ url, token }) : null;
+export const creds = findCreds();
+export const redis = creds ? new Redis({ url: creds.url, token: creds.token }) : null;
+
+// Nombres (nunca valores) de variables que parecen de Redis, para diagnóstico
+export function redisEnvNames() {
+  return Object.keys(process.env).filter((k) => /REDIS|KV_|UPSTASH/i.test(k)).sort();
+}
+
 export const DAYS = ['lun', 'mar', 'mie', 'jue', 'vie'];
 export const WEEKS_KEY = 'parrilla:semanas';
 export const weekKey = (w) => `parrilla:semana:${w}`;
@@ -39,5 +63,13 @@ export function sanitize(notas) {
 }
 
 export function noDb(res) {
-  res.status(500).json({ error: 'Base de datos no configurada. Conecta Upstash Redis al proyecto en Vercel.' });
+  res.status(500).json({
+    error: 'Base de datos no configurada: el servidor no encuentra las variables de Upstash. Conecta la base en Storage y haz Redeploy.',
+    variablesEncontradas: redisEnvNames(),
+  });
+}
+
+export function fail(res, e) {
+  console.error(e);
+  res.status(500).json({ error: 'Error con la base de datos: ' + String((e && e.message) || e).slice(0, 200) });
 }
