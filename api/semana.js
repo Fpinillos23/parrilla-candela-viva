@@ -1,4 +1,4 @@
-import { redis, WEEKS_KEY, weekKey, validWeek, emptyWeek, sanitize, noDb } from './_db.js';
+import { redis, WEEKS_KEY, weekKey, validWeek, emptyWeek, sanitize, noDb, fail } from './_db.js';
 
 // GET  /api/semana?w=2026-09-28   -> parrilla de esa semana
 // PUT  /api/semana  {w, notas}    -> guarda la parrilla de esa semana
@@ -28,7 +28,6 @@ export default async function handler(req, res) {
     res.setHeader('Allow', 'GET, PUT, POST');
     return res.status(405).json({ error: 'Método no permitido' });
   } catch (e) {
-    console.error(e);
-    return res.status(500).json({ error: 'Error del servidor' });
+    return fail(res, e);
   }
 }
