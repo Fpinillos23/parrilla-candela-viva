@@ -1,0 +1,10 @@
+{
+  "name": "parrilla-candela-viva",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Parrilla del en vivo de Candela Viva, lunes a viernes, con registro por semanas",
+  "dependencies": {
+    "@upstash/redis": "^1.34.0"
+  }
+}
