@@ -25,28 +25,10 @@ header{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;
 .weekbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .pill{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:14px;font-weight:500;min-height:44px}
 .dot{width:10px;height:10px;border-radius:50%;background:var(--brand)}
-.weekpick{position:relative}
-button.pill{color:var(--ink);width:100%}
-button.pill .chev{color:var(--muted);transition:transform .15s}
-button.pill[aria-expanded="true"] .chev{transform:rotate(180deg)}
-.cal{position:absolute;top:calc(100% + 8px);left:0;z-index:20;width:320px;background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 12px 32px rgba(28,21,18,.18);padding:14px;display:flex;flex-direction:column;gap:8px}
-.cal[hidden]{display:none}
-.cal-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.cal-head .iconbtn{width:38px;height:38px;border-radius:10px}
-.cal-title{font-family:'Bricolage Grotesque',Georgia,serif;font-weight:600;font-size:17px;text-transform:capitalize}
-.cal-dows,.cal-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
-.cal-dows span{font-size:12px;font-weight:600;color:var(--muted);text-align:center;padding:4px 0}
-.cal-weeks{display:flex;flex-direction:column;gap:2px}
-.cal-week{width:100%;min-height:40px;padding:0;border:0;border-radius:10px;background:transparent;color:var(--ink);align-items:center;font-size:14px}
-.cal-week:hover{background:#F3ECE4}
-.cal-week.sel{background:var(--brand);color:#fff}
-.cal-week span{display:flex;align-items:center;justify-content:center;height:32px}
-.cal-week .out{opacity:.4}
-.cal-week .we{opacity:.55}
-.cal-week .hoy{font-weight:700;text-decoration:underline;text-underline-offset:3px}
 .iconbtn{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);display:flex;align-items:center;justify-content:center}
 .ghost{min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-size:14px;font-weight:600;color:var(--ink)}
-.status{font-size:13px;color:var(--muted);min-width:110px;text-align:right}
+.status{font-size:13px;color:var(--muted);min-width:110px;max-width:260px;text-align:right}
+.status.err{text-decoration:underline dotted}
 .status.err{color:#B91C1C;font-weight:600}
 nav.days{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
 .day{min-height:64px;padding:12px 18px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);display:flex;justify-content:space-between;align-items:center;gap:8px;text-align:left}
@@ -113,9 +95,7 @@ dialog::backdrop{background:rgba(28,21,18,.55)}
   .day .s{display:block;font-family:'Bricolage Grotesque',Georgia,serif;font-weight:600;font-size:16px}
   .day .cs{display:block;font-size:12px;font-weight:600;opacity:.85}
   .weekbar{width:100%;display:grid;grid-template-columns:44px minmax(0,1fr) minmax(0,1fr) 44px;gap:8px}
-  .weekbar .weekpick{grid-column:2/4;min-width:0}
-  .weekbar .pill{justify-content:center;font-size:13px;padding:10px}
-  .cal{left:50%;transform:translateX(-50%);width:min(320px,calc(100vw - 32px))}
+  .weekbar .pill{grid-column:2/4;justify-content:center;font-size:13px;padding:10px}
   #today{grid-column:1/3}
   #histBtn{grid-column:3/5}
   .status{grid-column:1/-1}
@@ -138,18 +118,7 @@ dialog::backdrop{background:rgba(28,21,18,.55)}
     </div>
     <div class="weekbar">
       <button class="iconbtn" id="prev" aria-label="Semana anterior"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M11 4L6 9l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-      <div class="weekpick" id="weekPick">
-        <button type="button" class="pill" id="weekBtn" aria-haspopup="dialog" aria-expanded="false" aria-controls="cal"><span class="dot"></span><span id="weekLabel">Semana</span><svg class="chev" width="14" height="14" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4 7l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-        <div class="cal" id="cal" role="dialog" aria-label="Elegir semana" hidden>
-          <div class="cal-head">
-            <button type="button" class="iconbtn" id="calPrev" aria-label="Mes anterior"><svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M11 4L6 9l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-            <span class="cal-title" id="calTitle" aria-live="polite"></span>
-            <button type="button" class="iconbtn" id="calNext" aria-label="Mes siguiente"><svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M7 4l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          </div>
-          <div class="cal-dows" aria-hidden="true"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
-          <div class="cal-weeks" id="calWeeks"></div>
-        </div>
-      </div>
+      <div class="pill"><span class="dot"></span><span id="weekLabel">Semana</span></div>
       <button class="iconbtn" id="next" aria-label="Semana siguiente"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M7 4l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <button class="ghost" id="today">Esta semana</button>
       <button class="ghost" id="histBtn">Historial</button>
@@ -230,26 +199,69 @@ dialog::backdrop{background:rgba(28,21,18,.55)}
   var $ = function (id) { return document.getElementById(id); };
   var input = $('titulo'), addBtn = $('add'), statusEl = $('status');
 
-  function setStatus(text, err) { statusEl.textContent = text; statusEl.className = 'status' + (err ? ' err' : ''); }
+  var lastError = '';
+  function setStatus(text, err, detail) {
+    statusEl.textContent = text; statusEl.className = 'status' + (err ? ' err' : '');
+    lastError = err ? (detail || text) : '';
+    statusEl.title = lastError;
+    statusEl.style.cursor = err ? 'pointer' : 'default';
+  }
+  statusEl.addEventListener('click', function () {
+    if (!lastError) return;
+    alert('Detalle del problema:\n\n' + lastError + '\n\nTus notas quedan guardadas en este navegador y se subirán solas cuando la base de datos responda.\n\nPara revisar la conexión abre: ' + location.origin + '/api/salud');
+  });
+
+  // ---------- copia de respaldo en este navegador ----------
+  function bkKey(w) { return 'parrilla-candela:' + w; }
+  function readBackup(w) { try { var v = localStorage.getItem(bkKey(w)); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
+  function writeBackup(w, notas, synced) { try { localStorage.setItem(bkKey(w), JSON.stringify({ notas: notas, t: new Date().toISOString(), synced: !!synced })); } catch (e) {} }
+  function markSynced(w) { var b = readBackup(w); if (b) { b.synced = true; try { localStorage.setItem(bkKey(w), JSON.stringify(b)); } catch (e) {} } }
+
+  // Convierte cualquier falla en un mensaje entendible
+  function explain(r, j, netErr) {
+    if (netErr || !r) return location.protocol === 'file:'
+      ? 'Estás abriendo el archivo directamente desde tu computador. Abre la dirección de Vercel (https://…vercel.app).'
+      : 'No hay conexión con el servidor. Revisa tu internet.';
+    if (r.status === 404) return 'La página no encuentra el servidor (/api). Verifica que la carpeta "api" se subió a GitHub y que abres la dirección de Vercel.';
+    return (j && j.error) || ('El servidor respondió con error ' + r.status + '.');
+  }
+  function call(url, opts) {
+    return fetch(url, opts).then(function (r) {
+      return r.json().catch(function () { return null; }).then(function (j) {
+        if (!r.ok) throw { msg: explain(r, j) };
+        return j;
+      });
+    }, function () { throw { msg: explain(null, null, true) }; });
+  }
 
   // ---------- API ----------
   function load(week) {
     var seq = ++loadSeq;
     state.loading = true; setStatus('Cargando…'); render();
-    return fetch('/api/semana?w=' + encodeURIComponent(week), { cache: 'no-store' })
-      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || 'Error'); return j; }); })
+    return call('/api/semana?w=' + encodeURIComponent(week), { cache: 'no-store' })
       .then(function (j) {
         if (seq !== loadSeq) return;
-        state.notas = Object.assign(empty(), j.notas || {});
+        var bk = readBackup(week);
         state.loading = false;
-        setStatus(j.updatedAt ? 'Guardado' : 'Semana nueva');
+        // Si hay cambios de este navegador que no alcanzaron a subir y son más recientes, se conservan y se suben
+        if (bk && !bk.synced && (!j.updatedAt || bk.t > j.updatedAt)) {
+          state.notas = Object.assign(empty(), bk.notas);
+          render(); pending = true; saveNow();
+          return;
+        }
+        state.notas = Object.assign(empty(), j.notas || {});
+        writeBackup(week, state.notas, true);
+        setStatus(j.updatedAt ? 'Guardado ✓' : 'Semana nueva');
         render();
       })
       .catch(function (e) {
         if (seq !== loadSeq) return;
-        state.loading = false; state.notas = empty();
-        setStatus('Sin conexión con la base de datos', true);
+        var bk = readBackup(week);
+        state.loading = false;
+        state.notas = bk ? Object.assign(empty(), bk.notas) : empty();
+        setStatus('Sin conexión con la base de datos — ver detalle', true, e.msg);
         render();
+        setTimeout(function () { if (seq === loadSeq && !pending) load(week); }, 10000);
       });
   }
 
@@ -262,14 +274,19 @@ dialog::backdrop{background:rgba(28,21,18,.55)}
     clearTimeout(saveTimer);
     if (!pending) return Promise.resolve();
     pending = false;
-    var body = JSON.stringify({ w: state.week, notas: state.notas });
-    return fetch('/api/semana', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: body, keepalive: true })
-      .then(function (r) { if (!r.ok) throw new Error(); setStatus('Guardado ✓'); })
-      .catch(function () { pending = true; setStatus('No se pudo guardar — reintentando', true); saveTimer = setTimeout(saveNow, 4000); });
+    var w = state.week;
+    var body = JSON.stringify({ w: w, notas: state.notas });
+    return call('/api/semana', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: body, keepalive: true })
+      .then(function () { markSynced(w); setStatus('Guardado ✓'); })
+      .catch(function (e) {
+        pending = true;
+        setStatus('Guardado solo en este equipo — ver detalle', true, e.msg);
+        saveTimer = setTimeout(saveNow, 8000);
+      });
   }
-  window.addEventListener('beforeunload', function (e) { if (pending) { saveNow(); e.preventDefault(); e.returnValue = ''; } });
+  window.addEventListener('beforeunload', function () { if (pending) saveNow(); });
 
-  function change(fn) { var list = cur().slice(); fn(list); state.notas[state.day] = list; render(); scheduleSave(); }
+  function change(fn) { var list = cur().slice(); fn(list); state.notas[state.day] = list; writeBackup(state.week, state.notas, false); render(); scheduleSave(); }
 
   // ---------- acciones ----------
   function addNote() {
@@ -287,56 +304,6 @@ dialog::backdrop{background:rgba(28,21,18,.55)}
   $('prev').addEventListener('click', function () { goWeek(iso(addDays(parse(state.week), -7))); });
   $('next').addEventListener('click', function () { goWeek(iso(addDays(parse(state.week), 7))); });
   $('today').addEventListener('click', function () { goWeek(thisWeek); });
-
-  // ---------- calendario ----------
-  var MESES_L = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-  var cal = $('cal'), weekBtn = $('weekBtn'), calMonth = null;
-
-  function renderCal() {
-    var y = calMonth.getFullYear(), m = calMonth.getMonth();
-    $('calTitle').textContent = MESES_L[m] + ' ' + y;
-    var box = $('calWeeks'); box.innerHTML = '';
-    var last = new Date(y, m + 1, 0, 12), todayIso = iso(new Date());
-    for (var w = mondayOf(new Date(y, m, 1, 12)); w <= last; w = addDays(w, 7)) {
-      (function (mon) {
-        var wIso = iso(mon);
-        var b = document.createElement('button'); b.type = 'button';
-        b.className = 'cal-week' + (wIso === state.week ? ' sel' : '');
-        b.setAttribute('aria-label', weekText(wIso));
-        if (wIso === state.week) b.setAttribute('aria-current', 'true');
-        for (var i = 0; i < 7; i++) {
-          var d = addDays(mon, i), s = document.createElement('span');
-          s.textContent = d.getDate();
-          var cls = [];
-          if (d.getMonth() !== m) cls.push('out');
-          else if (i > 4) cls.push('we');
-          if (iso(d) === todayIso) cls.push('hoy');
-          s.className = cls.join(' ');
-          b.appendChild(s);
-        }
-        b.addEventListener('click', function () { closeCal(true); if (wIso !== state.week) goWeek(wIso); });
-        box.appendChild(b);
-      })(w);
-    }
-  }
-  function openCal() {
-    var a = parse(state.week); calMonth = new Date(a.getFullYear(), a.getMonth(), 1, 12);
-    renderCal(); cal.hidden = false; weekBtn.setAttribute('aria-expanded', 'true');
-    var sel = cal.querySelector('.cal-week.sel') || cal.querySelector('.cal-week');
-    if (sel) sel.focus();
-  }
-  function closeCal(focusBtn) {
-    if (cal.hidden) return;
-    cal.hidden = true; weekBtn.setAttribute('aria-expanded', 'false');
-    if (focusBtn) weekBtn.focus();
-  }
-  function shiftMonth(n) { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() + n, 1, 12); renderCal(); }
-
-  weekBtn.addEventListener('click', function () { if (cal.hidden) openCal(); else closeCal(); });
-  $('calPrev').addEventListener('click', function () { shiftMonth(-1); });
-  $('calNext').addEventListener('click', function () { shiftMonth(1); });
-  document.addEventListener('click', function (e) { if (!$('weekPick').contains(e.target)) closeCal(); });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !cal.hidden) closeCal(true); });
 
   // ---------- historial ----------
   var dlg = $('histDlg');
