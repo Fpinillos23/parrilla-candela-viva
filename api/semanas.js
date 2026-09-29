@@ -1,4 +1,4 @@
-import { redis, WEEKS_KEY, weekKey, DAYS, noDb } from './_db.js';
+import { redis, WEEKS_KEY, weekKey, DAYS, noDb, fail } from './_db.js';
 
 // GET /api/semanas -> historial: semanas guardadas con su conteo de notas
 export default async function handler(req, res) {
@@ -16,7 +16,6 @@ export default async function handler(req, res) {
     });
     return res.status(200).json({ semanas });
   } catch (e) {
-    console.error(e);
-    return res.status(500).json({ error: 'Error del servidor' });
+    return fail(res, e);
   }
 }
