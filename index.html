@@ -175,6 +175,9 @@ dialog::backdrop{background:rgba(28,21,18,.55)}
   ];
   var MESES = ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sep.', 'oct.', 'nov.', 'dic.'];
 
+  // ---------- hoja de Google (Apps Script publicado como aplicación web) ----------
+  var API = 'https://script.google.com/macros/s/AKfycbwWrPSmQnA0_xgBZeLUTBYDb9BZzPYdLfcaz2mhWTzZBSWAcVayJ2ymficSdcWNGhMwPg/exec';
+
   // ---------- fechas (hora local; la semana se identifica por su lunes AAAA-MM-DD) ----------
   function pad(n) { return (n < 10 ? '0' : '') + n; }
   function iso(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
@@ -208,7 +211,7 @@ dialog::backdrop{background:rgba(28,21,18,.55)}
   }
   statusEl.addEventListener('click', function () {
     if (!lastError) return;
-    alert('Detalle del problema:\n\n' + lastError + '\n\nTus notas quedan guardadas en este navegador y se subirán solas cuando la base de datos responda.\n\nPara revisar la conexión abre: ' + location.origin + '/api/salud');
+    alert('Detalle del problema:\n\n' + lastError + '\n\nTus notas quedan guardadas en este navegador y se subirán solas cuando la hoja de Google responda.\n\nPara revisar la conexión abre: ' + API + '?accion=salud');
   });
 
   // ---------- copia de respaldo en este navegador ----------
@@ -221,14 +224,13 @@ dialog::backdrop{background:rgba(28,21,18,.55)}
   function explain(r, j, netErr) {
     if (netErr || !r) return location.protocol === 'file:'
       ? 'Estás abriendo el archivo directamente desde tu computador. Abre la dirección de Vercel (https://…vercel.app).'
-      : 'No hay conexión con el servidor. Revisa tu internet.';
-    if (r.status === 404) return 'La página no encuentra el servidor (/api). Verifica que la carpeta "api" se subió a GitHub y que abres la dirección de Vercel.';
-    return (j && j.error) || ('El servidor respondió con error ' + r.status + '.');
+      : 'No hay conexión con la hoja de Google. Revisa tu internet.';
+    return (j && j.error) || ('La hoja de Google respondió con error ' + r.status + '. Revisa que el script esté publicado para «Cualquier usuario».');
   }
   function call(url, opts) {
     return fetch(url, opts).then(function (r) {
       return r.json().catch(function () { return null; }).then(function (j) {
-        if (!r.ok) throw { msg: explain(r, j) };
+        if (!r.ok || !j || j.error) throw { msg: explain(r, j) };
         return j;
       });
     }, function () { throw { msg: explain(null, null, true) }; });
@@ -238,7 +240,7 @@ dialog::backdrop{background:rgba(28,21,18,.55)}
   function load(week) {
     var seq = ++loadSeq;
     state.loading = true; setStatus('Cargando…'); render();
-    return call('/api/semana?w=' + encodeURIComponent(week), { cache: 'no-store' })
+    return call(API + '?accion=semana&w=' + encodeURIComponent(week), { cache: 'no-store' })
       .then(function (j) {
         if (seq !== loadSeq) return;
         var bk = readBackup(week);
@@ -259,7 +261,7 @@ dialog::backdrop{background:rgba(28,21,18,.55)}
         var bk = readBackup(week);
         state.loading = false;
         state.notas = bk ? Object.assign(empty(), bk.notas) : empty();
-        setStatus('Sin conexión con la base de datos — ver detalle', true, e.msg);
+        setStatus('Sin conexión con la hoja — ver detalle', true, e.msg);
         render();
         setTimeout(function () { if (seq === loadSeq && !pending) load(week); }, 10000);
       });
@@ -276,7 +278,7 @@ dialog::backdrop{background:rgba(28,21,18,.55)}
     pending = false;
     var w = state.week;
     var body = JSON.stringify({ w: w, notas: state.notas });
-    return call('/api/semana', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: body, keepalive: true })
+    return call(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: body })
       .then(function () { markSynced(w); setStatus('Guardado ✓'); })
       .catch(function (e) {
         pending = true;
@@ -311,8 +313,7 @@ dialog::backdrop{background:rgba(28,21,18,.55)}
   $('histBtn').addEventListener('click', function () {
     var ul = $('histList'); ul.innerHTML = '<li style="color:#5C504A">Cargando…</li>';
     dlg.showModal();
-    saveNow().then(function () { return fetch('/api/semanas', { cache: 'no-store' }); })
-      .then(function (r) { return r.json(); })
+    saveNow().then(function () { return call(API + '?accion=semanas', { cache: 'no-store' }); })
       .then(function (j) {
         ul.innerHTML = '';
         var rows = (j.semanas || []).filter(function (s) { return s.total > 0; });
