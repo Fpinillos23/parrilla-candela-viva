@@ -1,28 +1,23 @@
 # Parrilla · Candela Viva
 
-Web para programar la parrilla del en vivo (lunes a viernes). Guarda las notas en una base de datos y lleva un historial por semanas.
+Página para programar la parrilla del en vivo (lunes a viernes). Las notas se guardan en una hoja de Google y queda un registro por semanas.
 
-## Qué hay en esta carpeta
+- Página: https://parrilla-candela-viva.vercel.app
+- Hoja: «Parrilla Candela Viva» (Google Drive de torreinformativa17@gmail.com)
+- Script: «Parrilla Candela Viva - API» (Apps Script, publicado como aplicación web con acceso para «Cualquier usuario»)
 
-- `index.html`: la página (lo que ves en el navegador).
-- `api/semana.js`: carga y guarda la parrilla de una semana.
-- `api/semanas.js`: devuelve el historial de semanas guardadas.
-- `api/_db.js`: conexión con la base de datos (Upstash Redis).
-- `package.json`: la librería que usa el servidor.
+## Archivos
 
-## Publicarla en Vercel (con GitHub)
-
-1. **Sube la carpeta a GitHub.** En github.com crea un repositorio nuevo, por ejemplo `parrilla-candela-viva`. Luego pulsa "uploading an existing file" y arrastra el contenido de esta carpeta (index.html, package.json, .gitignore, LEEME.md y la carpeta `api`). No subas `node_modules`.
-2. **Importa el proyecto en Vercel.** En vercel.com entra con tu cuenta de GitHub. Pulsa **Add New… → Project**, elige el repositorio y pulsa **Deploy**. No hace falta configurar nada más: Vercel detecta el `index.html` y la carpeta `api`.
-3. **Crea la base de datos.** Dentro del proyecto ve a la pestaña **Storage**. Pulsa **Create Database** (o busca en el Marketplace) y elige **Upstash → Redis** con el plan **Free**. Conéctala a tu proyecto, marcando los entornos Production y Preview. Vercel agrega solo las variables `KV_REST_API_URL` y `KV_REST_API_TOKEN`.
-4. **Vuelve a publicar.** En **Deployments**, abre el menú (⋯) del último despliegue y pulsa **Redeploy**, para que el proyecto tome las variables nuevas.
-5. Abre la dirección `https://tu-proyecto.vercel.app`. Arriba a la derecha debe aparecer "Semana nueva" o "Guardado". Si dice "Sin conexión con la base de datos", repite los pasos 3 y 4.
-
-Cada vez que cambies un archivo en GitHub, Vercel publica la nueva versión automáticamente.
+- `index.html`: la página completa. La dirección del script está en la línea `var API = '…/exec'`.
+- `apps-script/Codigo.gs`: copia del código del script de Google, como respaldo.
 
 ## Cómo funciona
 
-- **Guardado automático:** cada cambio (agregar, planillar, mover, quitar) se guarda solo, más o menos medio segundo después.
-- **Semanas:** con las flechas pasas a la semana anterior o a la siguiente; "Esta semana" te regresa a la actual. Cada semana se guarda aparte y se identifica por la fecha de su lunes.
-- **Historial:** muestra todas las semanas que tienen notas, con cuántas quedaron planilladas.
-- **Acceso:** quien tenga el enlace puede ver y editar. No lo publiques en redes.
+- Cada nota es una fila de la hoja: Semana (fecha del lunes), Día, Orden, Nota, Planillada (Sí/No), ID y Actualizado.
+- La página lee con `?accion=semana&w=AAAA-MM-DD`, arma el historial con `?accion=semanas` y guarda la semana completa con un POST.
+- Si la hoja no responde, la página guarda una copia en el navegador y la sube sola cuando vuelve la conexión.
+- Para revisar la conexión, abre la dirección del script con `?accion=salud`.
+
+## Si cambias el script
+
+En Apps Script usa **Implementar → Gestionar implementaciones → editar (lápiz) → Versión: nueva → Implementar**. Así la dirección `/exec` sigue siendo la misma y no hay que tocar `index.html`.
